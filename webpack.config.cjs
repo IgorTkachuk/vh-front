@@ -31,7 +31,7 @@ module.exports = (env) => ({
         ],
       },
       {
-        test: /\.s[ac]ss$/i,
+        test: /\.s?[ac]ss$/i,
         use: [
           isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
           'css-modules-typescript-loader',
@@ -48,6 +48,7 @@ module.exports = (env) => ({
             },
           },
           'sass-loader',
+          'postcss-loader',
         ],
       },
     ],

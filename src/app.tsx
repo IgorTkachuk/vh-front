@@ -4,7 +4,7 @@ import "./style.scss";
 
 const App: React.FC = () => {
   let a: number;
-  a = 123456810;
+  a = 123456;
 
   return (
     <>

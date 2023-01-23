@@ -1,33 +1,31 @@
 const path = require("path");
 const webpack = require("webpack");
+const Dotenv = require("dotenv-webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 const ReactRefreshTypeScript = require("react-refresh-typescript");
 
-module.exports = {
+const mode = process.env.NODE_ENV || "development";
+const isDev = mode === "development";
+
+module.exports = (env) => ({
   entry: path.resolve(__dirname, "src", "index.tsx"),
-  mode: "development",
-  devtool: "inline-source-map", // "inline-source-map" for development and undefined for production
-  // watch: false,
-  // watchOptions: {
-  //   ignored: /node_modules/,
-  //   poll: 1000,
-  // },
+  mode: mode,
+  devtool: isDev ? "inline-source-map" : undefined,
   module: {
     rules: [
       {
         test: /\.[jt]sx?$/,
-        // use: "ts-loader",
         exclude: /node_modules/,
         use: [
           {
             loader: require.resolve("ts-loader"),
             options: {
               getCustomTransformers: () => ({
-                before: [ReactRefreshTypeScript()].filter(Boolean),
+                before: [isDev && ReactRefreshTypeScript()].filter(Boolean),
               }),
-              transpileOnly: true,
+              transpileOnly: isDev,
             },
           },
         ],
@@ -35,8 +33,7 @@ module.exports = {
       {
         test: /\.s[ac]ss$/i,
         use: [
-          // "style-loader", // in dev environment
-          MiniCssExtractPlugin.loader, // in production environment
+          isDev ? "style-loader" : MiniCssExtractPlugin.loader,
           "css-modules-typescript-loader",
           {
             loader: "css-loader",
@@ -44,7 +41,9 @@ module.exports = {
               modules: {
                 auto: (resourcePath) =>
                   Boolean(resourcePath.includes(".module.")),
-                localIdentName: "[path][name]__[local]--[hash:base64:5]",
+                localIdentName: isDev
+                  ? "[path][name]__[local]--[hash:base64:5]"
+                  : "[hash:base64:8]",
               },
             },
           },
@@ -76,5 +75,9 @@ module.exports = {
     new MiniCssExtractPlugin(),
     new ReactRefreshWebpackPlugin(),
     new webpack.HotModuleReplacementPlugin(),
+    new webpack.ProgressPlugin(),
+    new Dotenv({
+      path: `.env${env.file ? `.${env.file}` : ""}`,
+    }),
   ],
-};
+});

@@ -51,6 +51,10 @@ module.exports = (env) => ({
           'postcss-loader',
         ],
       },
+      {
+        test: /\.(png|jpg|gif)$/i,
+        type: 'asset/resource',
+      },
     ],
   },
   resolve: {
@@ -65,9 +69,17 @@ module.exports = (env) => ({
     static: {
       directory: path.join(__dirname, 'dist'),
     },
-    port: 9000,
+    historyApiFallback: true,
+    port: 8012,
     hot: true,
     open: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        pathRewrite: { '^/api': '' },
+        logLevel: 'debug',
+      },
+    },
   },
   plugins: [
     new HtmlWebpackPlugin({
